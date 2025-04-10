@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
+from utils.sessao.login import verificar_permissao
 from src.base import load_base_data
 
 st.set_page_config(page_title="Dashboard de Processos", page_icon="📊", layout="wide")
@@ -19,6 +20,8 @@ from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.calculo_limite.limite import calcular_limite_atual
 from utils.relatorio.botao_cpof import botao_gerar_e_baixar_pdf_cpof
 from utils.relatorio.relatorio_cpof import filtro_ano_mes
+
+verificar_permissao()
 
 sem_display()
 customizar_sidebar()

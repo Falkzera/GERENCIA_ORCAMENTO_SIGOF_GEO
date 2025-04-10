@@ -10,10 +10,12 @@ from sidebar.sem_display import sem_display
 from sidebar.page_home import mudar_pagina_home
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
 from src.base import load_base_data
+from utils.sessao.login import verificar_permissao
 
 # st.set_page_config(page_title="Relatórios", page_icon='', layout="wide")
 
 with st.container():  # PÁGINAS E CONFIGURAÇÃO SIDEBAR
+    verificar_permissao()
     sem_display()
     customizar_sidebar()
     mudar_pagina_cadastrar_processo()

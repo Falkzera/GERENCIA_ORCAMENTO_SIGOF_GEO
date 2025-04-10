@@ -22,6 +22,7 @@ from utils.estilizacao.dataframe import mostrar_tabela
 from utils.formatar.formatar_numero_decreto import formatar_numero_decreto
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from src.base import load_base_data
+from utils.sessao.login import verificar_permissao
 
 st.set_page_config(
     page_title="Editar Processo Orçamentário",
@@ -30,6 +31,7 @@ st.set_page_config(
 )
 
 with st.container(): # SIDEBAR
+    verificar_permissao()
     sem_display()
     customizar_sidebar()
     mudar_pagina_cadastrar_processo()

@@ -20,13 +20,14 @@ from src.base import load_base_data
 from datetime import datetime
 ano_corrente = datetime.now().year
 from sidebar.page_relatorio import mudar_pagina_relatorio
+from utils.sessao.login import verificar_permissao
 
 st.set_page_config(
     page_title="Cadastro de Processos Orçamentários",
     page_icon="📁",
     layout="wide",
 )
-
+verificar_permissao()
 sem_display()
 customizar_sidebar()
 mudar_pagina_editar_processo()

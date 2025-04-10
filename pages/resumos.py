@@ -9,9 +9,10 @@ from sidebar.page_home import mudar_pagina_home
 from utils.formatar.formatar_valor import formatar_valor
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from src.base import load_base_data
+from utils.sessao.login import verificar_permissao
 
 customizar_sidebar()
-
+verificar_permissao()
 sem_display()
 mudar_pagina_cadastrar_processo()
 mudar_pagina_editar_processo()

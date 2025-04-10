@@ -12,7 +12,9 @@ from sidebar.page_home import mudar_pagina_home
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.digitacao.digitacao import mes_por_extenso
 from src.base import load_base_data
+from utils.sessao.login import verificar_permissao
 
+verificar_permissao()
 sem_display()
 customizar_sidebar()
 mudar_pagina_cadastrar_processo()
