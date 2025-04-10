@@ -1,1 +1,0 @@
-Local onde é feito a conexão via API google drive/sheets.
