@@ -35,3 +35,25 @@ def load_base_data(forcar_recarregar=False):
             base['Data de Publicação'] = tratar_data(base['Data de Publicação'])
 
             st.session_state.base = base
+
+def load_base_ted(forcar_recarregar=False):
+    if "base_ted" not in st.session_state or forcar_recarregar:
+        with st.spinner("🔄 Carregando base de dados..."):
+            try:
+                conn = st.connection("gsheets", type=GSheetsConnection)
+                base_ted = conn.read(worksheet="TED", ttl=0)
+
+                if base_ted is None:
+                    st.error("❌ A aba 'TED' foi encontrada, mas está vazia (sem cabeçalho ou sem dados).")
+
+                st.session_state.base_ted = base_ted
+                
+            except Exception as e:
+                st.error(f"⚠️ Contate o desenvolvedor: Erro ao tentar carregar a aba 'TED': {e}")
+
+        # hoje = pd.Timestamp.now().normalize()
+        # base_ted["Data final"] = pd.to_datetime(base_ted["Data final"], format='%d/%m/%Y', errors='coerce')
+        # mask_concluido = (base_ted["Data final"] <= hoje) & (base_ted["Situação"] == "Em vigência")
+        # base_ted.loc[mask_concluido, "Situação"] = "CONCLUIDO"
+        # conn.update(base_ted, worksheet="TED")
+        # st.session_state.base_ted = base_ted

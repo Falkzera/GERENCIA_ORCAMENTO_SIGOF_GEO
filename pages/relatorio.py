@@ -5,7 +5,6 @@ from utils.relatorio.relatorio_cpof import filtro_ano_mes
 from sidebar.customizacao import customizar_sidebar
 from sidebar.page_editar import mudar_pagina_editar_processo
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
-from sidebar.page_resumos import mudar_pagina_resumos_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_home import mudar_pagina_home
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
@@ -21,7 +20,6 @@ with st.container():  # PÁGINAS E CONFIGURAÇÃO SIDEBAR
     mudar_pagina_cadastrar_processo()
     mudar_pagina_visualizar_processo()
     mudar_pagina_editar_processo()
-    mudar_pagina_resumos_processo()
     st.sidebar.write('---')
     mudar_pagina_home()
     

@@ -6,6 +6,7 @@ from utils.sessao.login import verificar_permissao
 
 from src.base import load_base_data
 
+
 st.set_page_config(page_title="Dashboard de Processos", page_icon="📊", layout="wide")
 verificar_permissao()
 
@@ -14,7 +15,6 @@ load_base_data()
 from sidebar.customizacao import customizar_sidebar
 from sidebar.page_editar import mudar_pagina_editar_processo
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
-from sidebar.page_resumos import mudar_pagina_resumos_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
 from utils.formatar.formatar_valor import formatar_valor, formatar_valor2
@@ -30,7 +30,6 @@ customizar_sidebar()
 mudar_pagina_cadastrar_processo()
 mudar_pagina_editar_processo()
 mudar_pagina_visualizar_processo()
-mudar_pagina_resumos_processo()
 st.sidebar.write('---')
 mudar_pagina_relatorio()
 
@@ -205,14 +204,4 @@ with st.container():
             st.plotly_chart(fig, use_container_width=True)
 
 
-with st.container():  # RELATÓRIO CPOF
-    st.write('---')
-
-
-
-
-    df = pd.DataFrame(st.session_state.base)
-    ano, mes, df_filtrado, df_mes_anterior = filtro_ano_mes(df, exibir_na_tela=True, key_prefix="home")
-
-    botao_gerar_e_baixar_pdf_cpof(ano, mes, df_filtrado, df_mes_anterior)
-
+st.write('---')

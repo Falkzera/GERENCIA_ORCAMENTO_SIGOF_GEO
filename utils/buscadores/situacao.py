@@ -65,5 +65,11 @@ mapa_cores_situacao = {
     
     # Situações finais (tons de verde escuro)
     "Processo Encerrado": "#2E8B57",  # Verde mar
-    "Atendido - Decreto Folha": "#3CB371"  # Verde médio
+    "Atendido - Decreto Folha": "#3CB371",  # Verde médio
+
+    # Para os Processos de TED (Em vigência) # red
+    "Em vigência": "#b81414",  # 
+    "Na unidade": "#D3D3D3",  # Cinza claro
+    "CONCLUIDO": "#23a713"
+    
 }

@@ -14,7 +14,6 @@ from utils.validadores.numero_decreto import validar_numero_decreto
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
-from sidebar.page_resumos import mudar_pagina_resumos_processo
 from sidebar.customizacao import customizar_sidebar
 from sidebar.page_home import mudar_pagina_home
 from utils.formatar.formatar_valor import formatar_valor_sem_cifrao
@@ -36,7 +35,6 @@ with st.container(): # SIDEBAR
     customizar_sidebar()
     mudar_pagina_cadastrar_processo()
     mudar_pagina_visualizar_processo()
-    mudar_pagina_resumos_processo()
     st.sidebar.write('---')
     mudar_pagina_relatorio()
     mudar_pagina_home()
@@ -51,12 +49,21 @@ with st.container(): # TÍTULO
 with st.container(): # MAIN
 
     salvar = []
-    processos_disponiveis = st.session_state.base["Nº do Processo"].tolist() # Coloco como lista todos os processos.
-    processo_edit = st.selectbox("Selecione um processo para editar", [""] + processos_disponiveis) # Construção do selectbox (Por isso importante atualizar a base primeiro! Para que o selectbox fique atualizado conforme a planilha.)
+
+    # Verificar se há processos filtrados na sessão
+    if "processos_filtrados" in st.session_state and not st.session_state.processos_filtrados.empty:
+        processos_disponiveis = st.session_state.processos_filtrados["Nº do Processo"].tolist()
+    else:
+        processos_disponiveis = st.session_state.base["Nº do Processo"].tolist()
+
+    processo_edit = st.selectbox(
+        "Selecione um processo para editar", 
+        [""] + processos_disponiveis
+    )
 
     if processo_edit:
-        row_index = st.session_state.base[st.session_state.base["Nº do Processo"] == processo_edit].index[0] # Pego o índice do processo selecionado
-        processo = st.session_state.base.loc[row_index] # Pego o processo selecionado        
+        row_index = st.session_state.base[st.session_state.base["Nº do Processo"] == processo_edit].index[0]
+        processo = st.session_state.base.loc[row_index]        
 
         if pd.notna(processo["Nº do decreto"]): # BLOCO DE VERIFICAÇÕES!
             if isinstance(processo["Nº do decreto"], (int, float)): # Verifica se o valor é numérico

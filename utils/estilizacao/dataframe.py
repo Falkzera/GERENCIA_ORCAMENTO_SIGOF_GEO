@@ -4,8 +4,23 @@ from utils.buscadores.situacao import mapa_cores_situacao
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
 def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", mostrar_na_tela=False):
+
+    # Inicializa o estado da sessão para esta tabela se não existir
+    if f'grid_options_{nome_tabela}' not in st.session_state:
+        st.session_state[f'grid_options_{nome_tabela}'] = None
+    if f'filtros_{nome_tabela}' not in st.session_state:
+        st.session_state[f'filtros_{nome_tabela}'] = None
+    if f'ordenacao_{nome_tabela}' not in st.session_state:
+        st.session_state[f'ordenacao_{nome_tabela}'] = None
+
     if not mostrar_na_tela:
         return  # Silencia a exibição no app
+    
+ # Inicializa o estado da sessão para esta tabela se não existir
+    if f'grid_options_{nome_tabela}' not in st.session_state:
+        st.session_state[f'grid_options_{nome_tabela}'] = None
+        st.session_state[f'filtros_{nome_tabela}'] = None
+
 
     from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
@@ -36,20 +51,6 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
         cellStyle=cell_style_padrao,
     )
 
-    largura_minima = {
-        "Órgão (UO)": 150,
-        "Nº do Processo": 220,
-        "Valor": 130,
-        "Situação": 180,
-        "Tipo de Crédito": 160,
-        "Fonte de Recursos": 150,
-        "Objeto": 300
-    }
-
-    for coluna, largura in largura_minima.items():
-        if coluna in df.columns:
-            gb.configure_column(coluna, minWidth=largura)
-
     if "Situação" in df.columns:
         from utils.buscadores.situacao import mapa_cores_situacao
         cell_style_situacao = JsCode(f"""
@@ -69,6 +70,16 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
         }}
         """)
         gb.configure_column("Situação", cellStyle=cell_style_situacao)
+
+
+    def on_grid_ready(params):
+            st.session_state[f'filtros_{nome_tabela}'] = params.api.getFilterModel()
+            st.session_state[f'ordenacao_{nome_tabela}'] = params.api.getSortModel()
+
+    if st.session_state[f'filtros_{nome_tabela}']:
+        grid_options['initialFilterModel'] = st.session_state[f'filtros_{nome_tabela}']
+    if st.session_state[f'ordenacao_{nome_tabela}']:
+        grid_options['initialSortModel'] = st.session_state[f'ordenacao_{nome_tabela}']
 
     grid_options = gb.build()
     grid_options['headerHeight'] = 60
@@ -120,3 +131,25 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
         domLayout='autoHeight' if muitas_colunas else 'normal',
         height=altura_final if not muitas_colunas else None
     )
+
+    from st_aggrid import JsCode
+
+    # Defina a função onGridReady em JavaScript diretamente
+    on_grid_ready_js = JsCode("""
+    function(params) {
+        const api = params.api;
+        const event = { api: api };
+        // Chama a função Python para salvar os filtros
+        const onReady = function(event) {
+            // Chama a função Python para salvar filtros e ordenação
+            // Adapte conforme necessário.
+            const filterModel = api.getFilterModel();
+            const sortModel = api.getSortModel();
+            window.parent.postMessage({ type: "save_filter", filterModel: filterModel, sortModel: sortModel }, "*");
+        };
+        onReady(event);
+    }
+    """)
+
+    # A seguir, use o código diretamente na configuração do grid
+    grid_options['onGridReady'] = on_grid_ready_js

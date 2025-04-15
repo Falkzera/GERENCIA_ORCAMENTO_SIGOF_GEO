@@ -12,7 +12,6 @@ from utils.validadores.valor import formatar_valor_br
 from sidebar.customizacao import customizar_sidebar
 from sidebar.page_editar import mudar_pagina_editar_processo
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
-from sidebar.page_resumos import mudar_pagina_resumos_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_home import mudar_pagina_home
 from utils.estilizacao.dataframe import mostrar_tabela 
@@ -32,7 +31,6 @@ sem_display()
 customizar_sidebar()
 mudar_pagina_editar_processo()
 mudar_pagina_visualizar_processo()
-mudar_pagina_resumos_processo()
 st.sidebar.write('---')
 mudar_pagina_home()
 mudar_pagina_relatorio()
