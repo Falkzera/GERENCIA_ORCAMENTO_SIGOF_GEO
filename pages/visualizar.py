@@ -5,7 +5,7 @@ from datetime import datetime
 
 from streamlit_tags import st_tags
 
-from src.base import load_base_ted
+# from src.base import load_base_ted
 from sidebar.customizacao import customizar_sidebar
 from utils.estilizacao.dataframe import mostrar_tabela 
 from sidebar.page_editar import mudar_pagina_editar_processo
