@@ -194,7 +194,16 @@ if escolha == "Processos de Execução Orçamentária":
     df_filtrado = st.session_state.base.copy()
     configurar_estado_ano_mes(df_filtrado)
     df_filtrado = aplicar_filtro_ano_mes(df_filtrado)
-    df_filtrado = filtros_de_busca(df_filtrado)
+    try:
+        df_filtrado = filtros_de_busca(df_filtrado)
+    except Exception as e:
+        situacoes_selecionadas = ", ".join(st.session_state.situacao_selecionados)
+        meses_escolhidos = ", ".join([mes_por_extenso(m) for m in st.session_state.meses_selecionados])
+        st.error(f"Não há dados disponíveis para a combinação dos meses e situações selecionados.")
+        st.warning(f"Mês escolhido: {meses_escolhidos}" if len(st.session_state.meses_selecionados) == 1 else f"Meses escolhidos: {meses_escolhidos}.")
+        st.warning(f"Situação escolhida: {situacoes_selecionadas}" if len(st.session_state.situacao_selecionados) == 1 else f"Situações escolhidas: {situacoes_selecionadas}")
+        st.stop()
+
     resumo_processo_orcamentario(df_filtrado)
 
 elif escolha == "Processos  de TED":
