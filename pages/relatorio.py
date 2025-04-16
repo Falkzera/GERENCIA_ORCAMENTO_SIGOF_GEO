@@ -3,7 +3,6 @@ import pandas as pd
 from utils.relatorio.botao_cpof import botao_gerar_e_baixar_pdf_cpof
 from utils.relatorio.relatorio_cpof import filtro_ano_mes
 from sidebar.customizacao import customizar_sidebar
-from sidebar.page_editar import mudar_pagina_editar_processo
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_home import mudar_pagina_home
@@ -19,7 +18,6 @@ with st.container():  # PÁGINAS E CONFIGURAÇÃO SIDEBAR
     customizar_sidebar()
     mudar_pagina_cadastrar_processo()
     mudar_pagina_visualizar_processo()
-    mudar_pagina_editar_processo()
     st.sidebar.write('---')
     mudar_pagina_home()
     

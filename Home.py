@@ -6,29 +6,22 @@ from utils.sessao.login import verificar_permissao
 
 from src.base import load_base_data
 
-
 st.set_page_config(page_title="Dashboard de Processos", page_icon="📊", layout="wide")
 verificar_permissao()
 
 load_base_data()
 
 from sidebar.customizacao import customizar_sidebar
-from sidebar.page_editar import mudar_pagina_editar_processo
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
 from utils.formatar.formatar_valor import formatar_valor, formatar_valor2
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.calculo_limite.limite import calcular_limite_atual
-from utils.relatorio.botao_cpof import botao_gerar_e_baixar_pdf_cpof
-from utils.relatorio.relatorio_cpof import filtro_ano_mes
-
-
 
 sem_display()
 customizar_sidebar()
 mudar_pagina_cadastrar_processo()
-mudar_pagina_editar_processo()
 mudar_pagina_visualizar_processo()
 st.sidebar.write('---')
 mudar_pagina_relatorio()
@@ -205,3 +198,4 @@ with st.container():
 
 
 st.write('---')
+

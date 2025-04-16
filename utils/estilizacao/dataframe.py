@@ -3,7 +3,33 @@ import pandas as pd
 from utils.buscadores.situacao import mapa_cores_situacao
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
-def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", mostrar_na_tela=False):
+import streamlit as st
+import pandas as pd
+from utils.validadores.data import validar_data_recebimento, validar_data_publicacao
+from utils.buscadores.tipo_credito import tipo_credito as opcoes_tipo_credito
+from utils.validadores.valor import validar_valor
+from utils.buscadores.grupo_despesa import opcoes_grupo_despesa
+from utils.buscadores.fonte_recurso import opcoes_fonte_recurso
+from utils.validadores.numero_processo import validar_numero_processo
+from utils.buscadores.orgao_uo import opcoes_orgao_uo
+from utils.buscadores.origem_recurso import opcoes_origem_recursos
+from utils.buscadores.contabilizar_limite import opcoes_contabilizar_limite
+from utils.buscadores.situacao import opcoes_situacao
+from utils.validadores.numero_decreto import validar_numero_decreto
+from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
+from sidebar.sem_display import sem_display
+from sidebar.page_visualizar import mudar_pagina_visualizar_processo
+from sidebar.customizacao import customizar_sidebar
+from sidebar.page_home import mudar_pagina_home
+from utils.formatar.formatar_valor import formatar_valor_sem_cifrao
+from utils.formatar.formatar_numero_decreto import formatar_numero_decreto
+from sidebar.page_relatorio import mudar_pagina_relatorio
+from src.base import load_base_data
+from utils.sessao.login import verificar_permissao
+
+
+
+def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", mostrar_na_tela=False, enable_click=False):
 
     # Inicializa o estado da sessão para esta tabela se não existir
     if f'grid_options_{nome_tabela}' not in st.session_state:
@@ -20,9 +46,6 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
     if f'grid_options_{nome_tabela}' not in st.session_state:
         st.session_state[f'grid_options_{nome_tabela}'] = None
         st.session_state[f'filtros_{nome_tabela}'] = None
-
-
-    from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
     if "Valor" in df.columns:
         df["Valor"] = df["Valor"].apply(
@@ -81,6 +104,18 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
     if st.session_state[f'ordenacao_{nome_tabela}']:
         grid_options['initialSortModel'] = st.session_state[f'ordenacao_{nome_tabela}']
 
+    if enable_click:
+        gb.configure_grid_options(
+            rowSelection="single",
+            suppressRowClickSelection=False,
+            onRowDoubleClicked=JsCode("""
+            function(event) {
+                const rowData = event.data;
+                window.parent.postMessage({ type: "row_double_click", data: rowData }, "*");
+            }
+            """)
+        )
+
     grid_options = gb.build()
     grid_options['headerHeight'] = 60
     grid_options['autoHeaderHeight'] = True
@@ -96,7 +131,7 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
     muitas_colunas = len(df.columns) > 6
 
     st.markdown(f"##### {nome_tabela}")
-    AgGrid(
+    response = AgGrid(
         df,
         gridOptions=grid_options,
         theme="alpine",
@@ -129,27 +164,24 @@ def mostrar_tabela(df, altura_max_linhas=10, nome_tabela="Tabela de Dados", most
         reload_data=True,
         update_mode='MODEL_CHANGED',
         domLayout='autoHeight' if muitas_colunas else 'normal',
-        height=altura_final if not muitas_colunas else None
+        height=altura_final if not muitas_colunas else None,
+        enable_enterprise_modules=True if enable_click else False,
+        return_mode="AS_INPUT" if enable_click else "NONE",
     )
 
-    from st_aggrid import JsCode
-
-    # Defina a função onGridReady em JavaScript diretamente
-    on_grid_ready_js = JsCode("""
-    function(params) {
-        const api = params.api;
-        const event = { api: api };
-        // Chama a função Python para salvar os filtros
-        const onReady = function(event) {
-            // Chama a função Python para salvar filtros e ordenação
-            // Adapte conforme necessário.
-            const filterModel = api.getFilterModel();
-            const sortModel = api.getSortModel();
-            window.parent.postMessage({ type: "save_filter", filterModel: filterModel, sortModel: sortModel }, "*");
-        };
-        onReady(event);
-    }
-    """)
-
-    # A seguir, use o código diretamente na configuração do grid
-    grid_options['onGridReady'] = on_grid_ready_js
+    if enable_click:
+        selected_rows = response.get("selected_rows")
+        if selected_rows is not None and len(selected_rows) > 0:
+            # Se for um DataFrame
+            if isinstance(selected_rows, pd.DataFrame):
+                selected_row = selected_rows.iloc[0].to_dict()
+                return selected_row
+            # Se for uma lista de dicionários
+            elif isinstance(selected_rows, list) and isinstance(selected_rows[0], dict):
+                selected_row = selected_rows[0]
+                return selected_row
+            else:
+                st.warning("Formato inesperado na linha selecionada. Verifique os dados.")
+                return None
+    
+    return None

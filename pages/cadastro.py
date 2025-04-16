@@ -10,7 +10,6 @@ from utils.buscadores.situacao import opcoes_situacao
 from utils.validadores.processo import validar_processamento_campos
 from utils.validadores.valor import formatar_valor_br
 from sidebar.customizacao import customizar_sidebar
-from sidebar.page_editar import mudar_pagina_editar_processo
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_home import mudar_pagina_home
@@ -29,7 +28,6 @@ st.set_page_config(
 verificar_permissao()
 sem_display()
 customizar_sidebar()
-mudar_pagina_editar_processo()
 mudar_pagina_visualizar_processo()
 st.sidebar.write('---')
 mudar_pagina_home()
