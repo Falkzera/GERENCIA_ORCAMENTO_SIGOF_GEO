@@ -13,12 +13,16 @@ from sidebar.customizacao import customizar_sidebar
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_home import mudar_pagina_home
+from sidebar.page_editar import mudar_pagina_editar
 from utils.estilizacao.dataframe import mostrar_tabela 
 from src.base import load_base_data
 from datetime import datetime
 ano_corrente = datetime.now().year
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.sessao.login import verificar_permissao
+from utils.marca.creditos import  desenvolvido
+
+
 
 st.set_page_config(
     page_title="Cadastro de Processos Orçamentários",
@@ -29,9 +33,13 @@ verificar_permissao()
 sem_display()
 customizar_sidebar()
 mudar_pagina_visualizar_processo()
-st.sidebar.write('---')
+mudar_pagina_editar()
 mudar_pagina_home()
 mudar_pagina_relatorio()
+desenvolvido()
+
+from utils.estilizacao.background import wallpaper
+wallpaper()
 
 st.header("Cadastro de Processos de Execução Orçamentária 📁")
 st.write("######")
@@ -142,3 +150,6 @@ if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary"
 
         mostrar_tabela(st.session_state.base[st.session_state.base["Nº do Processo"] == numero_processo],altura_max_linhas=99, 
                        nome_tabela="Processo Cadastrado!", mostrar_na_tela=True)
+        
+
+

@@ -15,16 +15,19 @@ from sidebar.customizacao import customizar_sidebar
 from sidebar.page_visualizar import mudar_pagina_visualizar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
+from sidebar.page_editar import mudar_pagina_editar
 from utils.formatar.formatar_valor import formatar_valor, formatar_valor2
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.calculo_limite.limite import calcular_limite_atual
+from utils.marca.creditos import desenvolvido
 
 sem_display()
 customizar_sidebar()
 mudar_pagina_cadastrar_processo()
 mudar_pagina_visualizar_processo()
-st.sidebar.write('---')
+mudar_pagina_editar()
 mudar_pagina_relatorio()
+desenvolvido()
 
 
 limite = calcular_limite_atual()
@@ -178,24 +181,30 @@ with st.container():
                     hole=0.4,
                     marker=dict(colors=["#095AA2", "#E0E0E0"]),
                     textinfo="percent+label",
-                    insidetextorientation="radial"
+                    insidetextorientation="radial",
+                    textfont=dict(size=16) 
                 )]
             )
 
             fig.update_layout(
                 margin=dict(t=0, b=0),
-                height=400,
+                height=340,
                 showlegend=False,
-                legend=dict(
-                    orientation="h",
-                    y=-0.1,
-                    x=0.5,
-                    xanchor="center"
-                ),
-            )
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                transition={'duration': 1000, 'easing': 'cubic-in-out'},
+                
+                )
+            
+            fig.data[0].values = [valor_limite_sobre_usado, 100 - valor_limite_sobre_usado]
+            
 
             st.plotly_chart(fig, use_container_width=True)
 
 
+
+
 st.write('---')
 
+from utils.estilizacao.background import wallpaper
+wallpaper()
