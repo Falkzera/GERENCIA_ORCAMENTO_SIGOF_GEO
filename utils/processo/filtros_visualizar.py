@@ -6,7 +6,7 @@ import streamlit as st
 from datetime import datetime
 from streamlit_tags import st_tags
 from utils.formatar.formatar_valor import formatar_valor
-from utils.digitacao.digitacao import mes_por_extenso, por_extenso_reais
+from utils.digitacao.digitacao import mes_por_extenso, por_extenso_reais, por_extenso
 
 
 def configurar_estado_ano_mes(df: pd.DataFrame):
@@ -119,8 +119,6 @@ def filtros_de_busca(df_filtrado):
 
         df_filtrado = df_filtrado[df_filtrado.apply(contem_palavras, axis=1)]
 
-    # mostrar_tabela(df_filtrado, mostrar_na_tela=True, enable_click=True)
-
     st.write('---')
 
     return df_filtrado
@@ -130,46 +128,57 @@ def resumo_processo_orcamentario(df_filtrado):
 
     def formatar_linha(numero):
         linha = df_filtrado[df_filtrado["Nº do Processo"] == numero].iloc[0]
-        return f"{linha['Situação']} | {linha['Nº do Processo']} | {linha['Órgão (UO)']} | {linha['Valor']}"
+        return f"{linha['Situação']} | {linha['Nº do Processo']} | {linha['Órgão (UO)']} | {linha['Valor']} | {linha['Origem de Recursos']}"
+    
 
+    opcoes_processo = ["TODOS"] + df_filtrado["Nº do Processo"].tolist()
     numero_processo = st.multiselect(
-    "Selecione a linha do dataframe",
-    options=df_filtrado["Nº do Processo"].tolist(), 
-    format_func=formatar_linha
-)
-
+        "Selecione a linha do dataframe",
+        options=opcoes_processo,
+        format_func=lambda x: "TODOS" if x == "TODOS" else formatar_linha(x)
+    )
+    if "TODOS" in numero_processo:
+        numero_processo = df_filtrado["Nº do Processo"].tolist()
+    
     if numero_processo:
         processo_selecionado = df_filtrado[df_filtrado["Nº do Processo"].isin(numero_processo)]
 
-        colunas_desejadas = ["Nº do Processo", "Órgão (UO)", "Objetivo", "Fonte de Recursos", "Origem de Recursos", "Valor"]
+        colunas_desejadas = ["Nº do Processo", "Órgão (UO)", "Objetivo", "Fonte de Recursos", "Valor"]
+        cada_tipo_origem = processo_selecionado['Origem de Recursos'].unique()  
 
-        descricao_texto = f"*Resumo de solicitações de créditos - SOP*\n\n"
-        descricao_texto += f"*Total de solicitações: {len(processo_selecionado)}*\n"
+        processo_selecionado = processo_selecionado.copy()
+        processo_selecionado['Valor_sem_formatacao'] = (
+            processo_selecionado['Valor']
+            .fillna('0')
+            .replace({r'R\$ ': '', r'\.': '', ',': '.'}, regex=True)
+            .astype(float, errors='ignore')
+        )
+    
+        descricao_texto = f"*Resumo das solicitações de créditos orçamentários - SOP*\n"
+        descricao_texto += f"_Atualizado em_: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+        descricao_texto += f"*Quantidade de solicitações*: _{len(processo_selecionado)} ({por_extenso(len(processo_selecionado)).title()}) Processo{'s' if len(processo_selecionado) > 1 else ''}_\n"
+        descricao_texto += f"*Valor total das solicitações*: {formatar_valor(processo_selecionado['Valor_sem_formatacao'].sum())}\n"
 
-        st.write(processo_selecionado['Origem de Recursos'].unique())
-        
-        if 'Valor' in processo_selecionado.columns:
-            processo_selecionado['Valor_sem_formatacao'] = (processo_selecionado['Valor'].fillna('0').replace({'R\$ ': '', '\.': '', ',': '.'}, regex=True).astype(float, errors='ignore'))
-        else:
-            st.error("A coluna 'Valor' não está presente no DataFrame.")
+        for tipo_origem in cada_tipo_origem:
+            processos_por_origem = processo_selecionado[processo_selecionado['Origem de Recursos'] == tipo_origem]
+            descricao_texto += f"\n"
+            descricao_texto += f"*{tipo_origem.title()}*: _{len(processos_por_origem)} ({por_extenso(len(processos_por_origem)).title()}) Processo{'s' if len(processos_por_origem) > 1 else ''}_\n"
+            
+            processos_por_origem.loc[:, 'Valor_sem_formatacao'] = (
+                processos_por_origem['Valor']
+                .fillna('0')
+                .replace({'R\$ ': '', '\.': '', ',': '.'}, regex=True)
+                .astype(float, errors='ignore')
+                )
+            
+            descricao_texto += f"*Valor total das solicitações {tipo_origem.lower()}*: {formatar_valor(processos_por_origem['Valor_sem_formatacao'].sum())}\n"
 
-        descricao_texto += f"*Valor Total das solicitações*: {formatar_valor(processo_selecionado['Valor_sem_formatacao'].sum())}\n\n"
-        descricao_texto += f"_Atualizado em_: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
-
-        contador = 1
-        for index, row in processo_selecionado.iterrows():
-
-            descricao = f" *- {contador}°* \n"  # Usar o contador em vez de index + 1
-            # descricao = f"\n"  # Usar o contador em vez de index + 1
-            for coluna in colunas_desejadas:
-                if coluna in row:  # Verifica se a coluna existe no DataFrame
-                    if coluna == "Valor":
-                        descricao += f"*{coluna}*: {(row[coluna])}\n"
-                    else:
+            for _, row in processos_por_origem.iterrows():
+                descricao = f"\n"
+                for coluna in colunas_desejadas:
+                    if coluna in row:
                         descricao += f"*{coluna}*: {row[coluna]}\n"
-            descricao += 2 * "\n"
-            descricao_texto += descricao
-            contador += 1  # Incrementa o contador para a próxima posição
+                descricao_texto += descricao
 
         st.text_area("📝 Resultados:", descricao_texto, height=400)
         output = io.BytesIO()
