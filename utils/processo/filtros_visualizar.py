@@ -5,8 +5,8 @@ import streamlit as st
 
 from datetime import datetime
 from streamlit_tags import st_tags
-
-from utils.digitacao.digitacao import mes_por_extenso
+from utils.formatar.formatar_valor import formatar_valor
+from utils.digitacao.digitacao import mes_por_extenso, por_extenso_reais
 
 
 def configurar_estado_ano_mes(df: pd.DataFrame):
@@ -142,20 +142,33 @@ def resumo_processo_orcamentario(df_filtrado):
         processo_selecionado = df_filtrado[df_filtrado["Nº do Processo"].isin(numero_processo)]
 
         colunas_desejadas = ["Nº do Processo", "Órgão (UO)", "Objetivo", "Fonte de Recursos", "Origem de Recursos", "Valor"]
-        descricao_texto = ""
+
+        descricao_texto = f"*Resumo de solicitações de créditos - SOP*\n\n"
+        descricao_texto += f"*Total de solicitações: {len(processo_selecionado)}*\n"
+
+        st.write(processo_selecionado['Origem de Recursos'].unique())
+        
+        if 'Valor' in processo_selecionado.columns:
+            processo_selecionado['Valor_sem_formatacao'] = (processo_selecionado['Valor'].fillna('0').replace({'R\$ ': '', '\.': '', ',': '.'}, regex=True).astype(float, errors='ignore'))
+        else:
+            st.error("A coluna 'Valor' não está presente no DataFrame.")
+
+        descricao_texto += f"*Valor Total das solicitações*: {formatar_valor(processo_selecionado['Valor_sem_formatacao'].sum())}\n\n"
+        descricao_texto += f"_Atualizado em_: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
 
         contador = 1
-    
         for index, row in processo_selecionado.iterrows():
-            descricao = f" *{contador}* \n"  # Usar o contador em vez de index + 1
+
+            descricao = f" *- {contador}°* \n"  # Usar o contador em vez de index + 1
+            # descricao = f"\n"  # Usar o contador em vez de index + 1
             for coluna in colunas_desejadas:
                 if coluna in row:  # Verifica se a coluna existe no DataFrame
                     if coluna == "Valor":
-                        descricao += f"{coluna}: {(row[coluna])}\n"
+                        descricao += f"*{coluna}*: {(row[coluna])}\n"
                     else:
-                        descricao += f"{coluna}: {row[coluna]}\n"
-            descricao += "-----------------------------\n"
-            descricao_texto += descricao + "\n"
+                        descricao += f"*{coluna}*: {row[coluna]}\n"
+            descricao += 2 * "\n"
+            descricao_texto += descricao
             contador += 1  # Incrementa o contador para a próxima posição
 
         st.text_area("📝 Resultados:", descricao_texto, height=400)

@@ -16,10 +16,11 @@ from sidebar.page_visualizar import mudar_pagina_visualizar_processo
 from sidebar.sem_display import sem_display
 from sidebar.page_cadastro import mudar_pagina_cadastrar_processo
 from sidebar.page_editar import mudar_pagina_editar
-from utils.formatar.formatar_valor import formatar_valor, formatar_valor2
+from utils.formatar.formatar_valor import formatar_valor, formatar_valor2, formatar_valor_sem_cifrao, formatar_valor_arredondado
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.calculo_limite.limite import calcular_limite_atual
 from utils.marca.creditos import desenvolvido
+from utils.buscadores.situacao import mapa_cores_situacao
 
 sem_display()
 customizar_sidebar()
@@ -208,3 +209,83 @@ st.write('---')
 
 from utils.estilizacao.background import wallpaper
 wallpaper()
+
+
+st.caption('Acomapnhamento da Situação Processual')
+
+
+
+
+# ---------- Dados ----------
+
+# a quantidade de cada situacao
+situacao_counts = st.session_state.base['Situação'].value_counts()
+situacao_counts = situacao_counts.reset_index()
+situacao_counts.columns = ['Situação', 'Quantidade']
+# st.write(situacao_counts)
+
+# total de processos
+
+total_processos = situacao_counts['Quantidade'].sum()
+
+def escolhendo_indicador(situacao_counts, situacao):
+    return situacao_counts.set_index('Situação').get('Quantidade', {}).get(situacao, 0)
+
+# ---------- Indicadores ----------
+indicadores_situacao = {
+    "Total de Processos": total_processos,
+    "Análise - SOP": escolhendo_indicador(situacao_counts, 'Análise - SOP'),
+    "Análise - SEFAZ": escolhendo_indicador(situacao_counts, 'Análise - SEFAZ'),
+    "Análise - CPOF": escolhendo_indicador(situacao_counts, 'Análise - CPOF'),
+    # "Análise - SUPLAN/SEPLAG": escolhendo_indicador(situacao_counts, 'Análise - SUPLAN/SEPLAG'),
+    # "Aprovado - CPOF": escolhendo_indicador(situacao_counts, 'Aprovado - CPOF'),
+    # "BLOCO 434050 - SOP - Superintendente": escolhendo_indicador(situacao_counts, 'BLOCO 434050 - SOP - Superintendente'),
+    # "BLOCO 434066 - SEPLAG - Demais Orgãos": escolhendo_indicador(situacao_counts, 'BLOCO 434066 - SEPLAG - Demais Orgãos'),
+    # "BLOCO 434078 - SEFAZ - Despachos e Decretos": escolhendo_indicador(situacao_counts, 'BLOCO 434078 - SEFAZ - Despachos e Decretos'),
+    # "Minuta de decreto confeccionada": escolhendo_indicador(situacao_counts, 'Minuta de decreto confeccionada'),
+    # "Na Unidade": escolhendo_indicador(situacao_counts, 'Na Unidade'),
+    # "Processo Encerrado": escolhendo_indicador(situacao_counts, 'Processo Encerrado'),
+    "Publicado": escolhendo_indicador(situacao_counts, 'Publicado'),  
+    }
+
+# ---------- Cores ----------
+azuis = [
+    "#095aa2",
+    "#226bab",
+    "#3a7bb5",
+    "#538cbe",
+    "#6b9cc7",
+
+]
+
+cores_financas = [azuis[i % len(azuis)] for i in range(len(indicadores_situacao))]
+
+# cores_financas = [mapa_cores_situacao.get(situacao, "#095AA2") for situacao in indicadores_situacao.keys()]
+# ---------- Blocos ----------
+
+cols_kpi = st.columns(len(indicadores_situacao))
+for idx, (titulo, valor) in enumerate(indicadores_situacao.items()):
+    with cols_kpi[idx]:
+        st.markdown(f"""
+        <div style='background-color:{cores_financas[idx]};
+                    padding:20px;
+                    border-radius:20px;
+                    text-align:center;
+                    color:white;
+                    border:0px solid #b5cee3;
+                    animation: fadeIn 0.5s ease-in-out;'>
+            <b style='font-size:18px;'>{titulo}</b><br>
+            <span style='font-size:30px;font-weight:bold;'>{(valor)}</span>
+        </div>
+        <style>
+        @keyframes fadeIn {{
+            from {{ opacity: 0; }}
+            to {{ opacity: 1; }}
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
+
+
+
+# clique de evento a partir de indicadores_situacao
