@@ -26,7 +26,7 @@ def load_base_data(forcar_recarregar=False):
             base = conn.read(worksheet="Processos Base", ttl=0)
 
             # Filtra e trata os dados
-            base = base[manter_apenas_essas_colunas]
+            # base = base[manter_apenas_essas_colunas]
             base["Fonte de Recursos"] = base["Fonte de Recursos"].astype(str)
             base["Grupo de Despesas"] = base["Grupo de Despesas"].astype(str)
             base["Nº do Processo"] = base["Nº do Processo"].astype(str).str.strip()

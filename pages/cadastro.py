@@ -116,6 +116,7 @@ if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary"
                        nome_tabela="Processo já cadastrado!", mostrar_na_tela=True)
         st.stop()
     else:
+        agora = datetime.now()
         novo = pd.DataFrame([{
             "Situação": situacao,
             "Origem de Recursos": origem_recursos,
@@ -130,7 +131,8 @@ if st.button("Cadastrar Processo 📁", use_container_width=True, type="primary"
             "Data de Recebimento": data_recebimento,
             "Data de Publicação": data_publicacao,
             "Nº do decreto": numero_decreto,
-            "Contabilizar no Limite?": contabilizar_limite
+            "Contabilizar no Limite?": contabilizar_limite,
+            "Cadastrado Por": st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S"),
         }])
 
         # TRATAR O VALOR (DE R$ 1.234,56 PARA 1234.56)

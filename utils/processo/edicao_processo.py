@@ -17,6 +17,8 @@ from utils.validadores.numero_decreto import validar_numero_decreto
 from utils.formatar.formatar_valor import formatar_valor_sem_cifrao
 from utils.formatar.formatar_numero_decreto import formatar_numero_decreto
 from src.base import load_base_data
+from utils.logs.historico import salvar_modificacao, exibir_historico
+from datetime import datetime
 
 def formulario_edicao_processo():
 
@@ -120,6 +122,7 @@ def formulario_edicao_processo():
 
             else: # Realiza a edição do processo
 
+                agora = datetime.now()
                 base = st.session_state.base
                 base.loc[row_index, "Situação"] = nova_situacao
                 base.loc[row_index, "Origem de Recursos"] = nova_origem
@@ -135,6 +138,7 @@ def formulario_edicao_processo():
                 base.loc[row_index, "Data de Recebimento"] = data_recebimento_edit
                 base.loc[row_index, "Data de Publicação"] = data_publicacao_edit
                 base.loc[row_index, "Nº do decreto"] = numero_decreto_edit
+                base.loc[row_index, "Última Edição"] = st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S")
 
                 try: # Atualiza a planilha do Google Sheets
                     from streamlit_gsheets import GSheetsConnection
@@ -145,44 +149,59 @@ def formulario_edicao_processo():
                     st.error(f"Erro ao atualizar a planilha: {e}")
                     st.stop()
 
-                # modificacoes = [] # Uma lista para destrinchar o que foi modificado!
+                modificacoes = [] # Uma lista para destrinchar o que foi modificado!
 
-                # def is_not_nan(value):
-                #     return not pd.isna(value)
+                def is_not_nan(value):
+                    return not pd.isna(value)
 
-                # if nova_situacao != processo["Situação"] and is_not_nan(nova_situacao) and is_not_nan(processo["Situação"]):
-                #     modificacoes.append(f"Situação: {processo['Situação']} -> {nova_situacao}")
-                # if nova_origem != processo["Origem de Recursos"] and is_not_nan(nova_origem) and is_not_nan(processo["Origem de Recursos"]):
-                #     modificacoes.append(f"Origem de Recursos: {processo['Origem de Recursos']} -> {nova_origem}")
-                # if novo_orgao != processo["Órgão (UO)"] and is_not_nan(novo_orgao) and is_not_nan(processo["Órgão (UO)"]):
-                #     modificacoes.append(f"Órgão (UO): {processo['Órgão (UO)']} -> {novo_orgao}")
-                # if novo_contabilizar_limite != processo["Contabilizar no Limite?"] and is_not_nan(novo_contabilizar_limite) and is_not_nan(processo["Contabilizar no Limite?"]):
-                #     modificacoes.append(f"Contabilizar no Limite?: {processo['Contabilizar no Limite?']} -> {novo_contabilizar_limite}")
-                # if novo_processo != processo["Nº do Processo"] and is_not_nan(novo_processo) and is_not_nan(processo["Nº do Processo"]):
-                #     modificacoes.append(f"Nº do Processo: {processo['Nº do Processo']} -> {novo_processo}")
-                # if novo_tipo_credito != processo["Tipo de Crédito"] and is_not_nan(novo_tipo_credito) and is_not_nan(processo["Tipo de Crédito"]):
-                #     modificacoes.append(f"Tipo de Crédito: {processo['Tipo de Crédito']} -> {novo_tipo_credito}")
-                # if nova_fonte != processo["Fonte de Recursos"] and is_not_nan(nova_fonte) and is_not_nan(processo["Fonte de Recursos"]):
-                #     modificacoes.append(f"Fonte de Recursos: {processo['Fonte de Recursos']} -> {nova_fonte}")
-                # if novo_grupo != processo["Grupo de Despesas"] and is_not_nan(novo_grupo) and is_not_nan(processo["Grupo de Despesas"]):
-                #     modificacoes.append(f"Grupo de Despesas: {processo['Grupo de Despesas']} -> {novo_grupo}")
-                # if float(valor_edit.replace(".", "").replace(",", ".")) != processo["Valor"] and is_not_nan(valor_edit) and is_not_nan(processo["Valor"]):
-                #     modificacoes.append(f"Valor: {processo['Valor']} -> {valor_edit}")
-                # if objetivo_edit != processo["Objetivo"] and is_not_nan(objetivo_edit) and is_not_nan(processo["Objetivo"]):
-                #     modificacoes.append(f"Objetivo: {processo['Objetivo']} -> {objetivo_edit}")
-                # if observacao_edit != processo["Observação"] and is_not_nan(observacao_edit) and is_not_nan(processo["Observação"]):
-                #     modificacoes.append(f"Observação: {processo['Observação']} -> {observacao_edit}")
-                # if data_recebimento_edit != processo["Data de Recebimento"] and is_not_nan(data_recebimento_edit) and is_not_nan(processo["Data de Recebimento"]):
-                #     modificacoes.append(f"Data de Recebimento: {processo['Data de Recebimento']} -> {data_recebimento_edit}")
-                # if data_publicacao_edit != processo["Data de Publicação"] and is_not_nan(data_publicacao_edit) and is_not_nan(processo["Data de Publicação"]):
-                #     modificacoes.append(f"Data de Publicação: {processo['Data de Publicação']} -> {data_publicacao_edit}")
-                # if numero_decreto_edit != processo["Nº do decreto"] and is_not_nan(numero_decreto_edit) and is_not_nan(processo["Nº do decreto"]):
-                #     modificacoes.append(f"Nº do Decreto: {processo['Nº do decreto']} -> {numero_decreto_edit}")
+                if nova_situacao != processo["Situação"] and is_not_nan(nova_situacao) and is_not_nan(processo["Situação"]):
+                    modificacoes.append(f"Situação: {processo['Situação']} -> {nova_situacao}")
+                if nova_origem != processo["Origem de Recursos"] and is_not_nan(nova_origem) and is_not_nan(processo["Origem de Recursos"]):
+                    modificacoes.append(f"Origem de Recursos: {processo['Origem de Recursos']} -> {nova_origem}")
+                if novo_orgao != processo["Órgão (UO)"] and is_not_nan(novo_orgao) and is_not_nan(processo["Órgão (UO)"]):
+                    modificacoes.append(f"Órgão (UO): {processo['Órgão (UO)']} -> {novo_orgao}")
+                if novo_contabilizar_limite != processo["Contabilizar no Limite?"] and is_not_nan(novo_contabilizar_limite) and is_not_nan(processo["Contabilizar no Limite?"]):
+                    modificacoes.append(f"Contabilizar no Limite?: {processo['Contabilizar no Limite?']} -> {novo_contabilizar_limite}")
+                if novo_processo != processo["Nº do Processo"] and is_not_nan(novo_processo) and is_not_nan(processo["Nº do Processo"]):
+                    modificacoes.append(f"Nº do Processo: {processo['Nº do Processo']} -> {novo_processo}")
+                if novo_tipo_credito != processo["Tipo de Crédito"] and is_not_nan(novo_tipo_credito) and is_not_nan(processo["Tipo de Crédito"]):
+                    modificacoes.append(f"Tipo de Crédito: {processo['Tipo de Crédito']} -> {novo_tipo_credito}")
+                if nova_fonte != processo["Fonte de Recursos"] and is_not_nan(nova_fonte) and is_not_nan(processo["Fonte de Recursos"]):
+                    modificacoes.append(f"Fonte de Recursos: {processo['Fonte de Recursos']} -> {nova_fonte}")
+                if novo_grupo != processo["Grupo de Despesas"] and is_not_nan(novo_grupo) and is_not_nan(processo["Grupo de Despesas"]):
+                    modificacoes.append(f"Grupo de Despesas: {processo['Grupo de Despesas']} -> {novo_grupo}")
+                if float(valor_edit.replace(".", "").replace(",", ".")) != processo["Valor"] and is_not_nan(valor_edit) and is_not_nan(processo["Valor"]):
+                    modificacoes.append(f"Valor: {processo['Valor']} -> {valor_edit}")
+                if objetivo_edit != processo["Objetivo"] and is_not_nan(objetivo_edit) and is_not_nan(processo["Objetivo"]):
+                    modificacoes.append(f"Objetivo: {processo['Objetivo']} -> {objetivo_edit}")
+                if observacao_edit != processo["Observação"] and is_not_nan(observacao_edit) and is_not_nan(processo["Observação"]):
+                    modificacoes.append(f"Observação: {processo['Observação']} -> {observacao_edit}")
+                if data_recebimento_edit != processo["Data de Recebimento"] and is_not_nan(data_recebimento_edit) and is_not_nan(processo["Data de Recebimento"]):
+                    modificacoes.append(f"Data de Recebimento: {processo['Data de Recebimento']} -> {data_recebimento_edit}")
+                if data_publicacao_edit != processo["Data de Publicação"] and is_not_nan(data_publicacao_edit) and is_not_nan(processo["Data de Publicação"]):
+                    modificacoes.append(f"Data de Publicação: {processo['Data de Publicação']} -> {data_publicacao_edit}")
+                if numero_decreto_edit != processo["Nº do decreto"] and is_not_nan(numero_decreto_edit) and is_not_nan(processo["Nº do decreto"]):
+                    modificacoes.append(f"Nº do Decreto: {processo['Nº do decreto']} -> {numero_decreto_edit}")
+                
 
-                # if modificacoes: # Mostrar a destrinchação do que foi modificado
-                #     st.write("### Modificações realizadas:")
+                if modificacoes: # Mostrar a destrinchação do que foi modificado
+                    st.write("### Modificações realizadas:")
+                    for mod in modificacoes:
+                        st.write(f"- {mod}")
+
+                # if modificacoes:  # Mostrar a destrinchação do que foi modificado
+                #     modificacoes.append(f"Última Edição: {st.session_state.base.loc[row_index, 'Última Edição']} -> {st.session_state.username.title() + ' - ' + agora.strftime('%d/%m/%Y %H:%M:%S')}")
+                    
+                #     # Salvar as modificações no histórico
+                #     for mod in modificacoes:
+                        
+                #         salvar_modificacao(processo_edit, mod, st.session_state.username.title())
+
+                #     # Exibir as modificações
+                #     st.write(f"### Modificações realizadas: {st.session_state.username.title()}")
                 #     for mod in modificacoes:
                 #         st.write(f"- {mod}")
+
                 
                 load_base_data(forcar_recarregar=True)  # Recarrega a base de dados
                 del st.session_state["processo_edit"]

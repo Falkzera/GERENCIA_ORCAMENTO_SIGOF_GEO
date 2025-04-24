@@ -206,12 +206,12 @@ def mostrar_tabela(
     # encontra colunas de texto com poucos valores únicos
     set_filter_cols = [
         col for col in df.select_dtypes(include=['object', 'category']).columns
-        if df[col].nunique() <= UNIQUE_THRESHOLD
+        if df[col].nunique() <= UNIQUE_THRESHOLD and col not in ["Última Edição", "Cadastrado Por"]
     ]
 
     # Aqui vem a diferença: pegue os valores do df de verdade
     unique_vals = {
-        col: sorted(df[col].dropna().unique().tolist())
+        col: (df[col].dropna().unique().tolist())
         for col in set_filter_cols
     }
 
@@ -234,6 +234,22 @@ def mostrar_tabela(
 
     # Título
     st.markdown(f"##### {nome_tabela}")
+
+    # # Tentativa de ordenar as colunas
+    # try:
+    #     # Restaura a ordenação anterior e tenta aplicar na tabela
+    #     for col in df.columns:
+    #         try:
+    #             # Tenta ordenar a coluna
+    #             df = df.sort_values(by=col, ascending=True)
+    #         except Exception as e:
+    #             # Se não for possível ordenar, ignora e vai para a próxima
+    #             st.warning(f"Não foi possível ordenar a coluna '{col}': {e}")
+    #             continue  # Ignora e passa para a próxima coluna
+
+    # except Exception as e:
+    #     st.error(f"Ocorreu um erro ao tentar ordenar a tabela: {e}")
+
 
     # Renderiza a AgGrid
     response = AgGrid(

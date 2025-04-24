@@ -38,7 +38,6 @@ VALOR_DO_LIMITE = limite["valor_limite"]
 ORÇAMENTO_APROVADO_2025 = limite["orcamento_aprovado"]
 
 
-
 with st.container():
 
     with st.container(): # VALOR DO LIMITE (CÁLCULO)

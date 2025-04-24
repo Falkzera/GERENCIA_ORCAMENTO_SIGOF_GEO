@@ -23,6 +23,8 @@ from sidebar.page_relatorio import mudar_pagina_relatorio
 from src.base import load_base_data
 from utils.sessao.login import verificar_permissao
 from utils.marca.creditos import  desenvolvido
+from utils.logs.historico import salvar_modificacao, exibir_historico
+from datetime import datetime
 
 
 st.set_page_config(
@@ -117,6 +119,7 @@ with st.container(): # MAIN
 
             salvar = st.form_submit_button("Salvar Edição", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁') # Salvando o forms
 
+    # exibir_historico()
     if salvar: # Lógicas de verificações após clicar em SALVAR! Só será salvo caso passe por todoas as verificações!!!
         
         erros = [] # Validações 
@@ -159,7 +162,8 @@ with st.container(): # MAIN
                 st.info("ℹ️ Nenhuma modificação foi realizada no processo, o processo permanece inalterado.")
 
             else: # Realiza a edição do processo
-
+                
+                agora = datetime.now()
                 base = st.session_state.base
                 base.loc[row_index, "Situação"] = nova_situacao
                 base.loc[row_index, "Origem de Recursos"] = nova_origem
@@ -175,6 +179,7 @@ with st.container(): # MAIN
                 base.loc[row_index, "Data de Recebimento"] = data_recebimento_edit
                 base.loc[row_index, "Data de Publicação"] = data_publicacao_edit
                 base.loc[row_index, "Nº do decreto"] = numero_decreto_edit
+                base.loc[row_index, "Última Edição"] = st.session_state.username.title() + ' - ' + agora.strftime("%d/%m/%Y %H:%M:%S")
 
                 try: # Atualiza a planilha do Google Sheets
                     from streamlit_gsheets import GSheetsConnection
@@ -218,11 +223,30 @@ with st.container(): # MAIN
                     modificacoes.append(f"Data de Publicação: {processo['Data de Publicação']} -> {data_publicacao_edit}")
                 if numero_decreto_edit != processo["Nº do decreto"] and is_not_nan(numero_decreto_edit) and is_not_nan(processo["Nº do decreto"]):
                     modificacoes.append(f"Nº do Decreto: {processo['Nº do decreto']} -> {numero_decreto_edit}")
+                # verificar a mudança em "Última Edição"
+                
 
                 if modificacoes: # Mostrar a destrinchação do que foi modificado
-                    st.write("### Modificações realizadas:")
+                    modificacoes.append(f"Última Edição: {st.session_state.base.loc[row_index, 'Última Edição']} -> {st.session_state.username.title() + ' - ' + agora.strftime('%d/%m/%Y %H:%M:%S')}")
+                    st.write(f"### Modificações realizadas: {st.session_state.username.title()}")
                     for mod in modificacoes:
                         st.write(f"- {mod}")
+
+                # if modificacoes:  # Mostrar a destrinchação do que foi modificado
+                #     # Adiciona a última edição à lista de modificações
+                #     modificacoes.append(f"Última Edição: {st.session_state.base.loc[row_index, 'Última Edição']} -> {st.session_state.username.title() + ' - ' + agora.strftime('%d/%m/%Y %H:%M:%S')}")
+
+                #     # Salvar as modificações no histórico (Google Sheets)
+                #     for mod in modificacoes:
+                #         # Salva cada modificação no Google Sheets com o id do processo, descrição e usuário
+                #         salvar_modificacao(processo_edit, mod, st.session_state.username.title())
+
+                #     # Exibir as modificações realizadas na interface
+                #     st.write(f"### Modificações realizadas por: {st.session_state.username.title()}")
+                #     for mod in modificacoes:
+                #         st.write(f"- {mod}")
+
+
 
                 mostrar_tabela(base[base["Nº do Processo"] == novo_processo], altura_max_linhas=99, nome_tabela="Processo Editado!", mostrar_na_tela=True) # Visualização do processo editado
 
