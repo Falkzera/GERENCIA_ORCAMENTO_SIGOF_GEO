@@ -35,8 +35,9 @@ ano, mes, df_filtrado, df_filtrado_mes_anterior = filtro_ano_mes(df, exibir_na_t
 from utils.relatorio.montar_relatorio import botao_gerar_e_baixar_arquivo
 from utils.relatorio.relatorio_cpof import montar_relatorio_cpof
 
+# Lógica de RESUMO do que se trata, e opções para interno em DOCX e PDF, e externo apenas DOCx
 botao_gerar_e_baixar_arquivo(
-    nome_botao="Gerar Relatório CPOF (Docx)",
+    nome_botao="Gerar Relatório CPOF (PDF)",
     montar_conteudo_funcao=montar_relatorio_cpof,
     parametros_funcao={
         "ano": ano,
@@ -44,8 +45,8 @@ botao_gerar_e_baixar_arquivo(
         "df_filtrado": df_filtrado,
         "df_filtrado_mes_anterior": df_filtrado_mes_anterior
     },
-    nome_arquivo=f"Relatorio_CPOF_{mes_por_extenso(mes)}_{ano}.docx",
-    tipo_arquivo="docx"
+    nome_arquivo=f"Relatorio_CPOF_{mes_por_extenso(mes)}_{ano}.pdf",
+    tipo_arquivo="pdf"
 )
 
 
