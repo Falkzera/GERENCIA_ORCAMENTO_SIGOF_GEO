@@ -11,3 +11,4 @@ def validar_numero_decreto(numero: str) -> bool:
         return True
     pattern = r"^\d{3}\.\d{3}$"
     return re.match(pattern, numero.strip()) is not None
+

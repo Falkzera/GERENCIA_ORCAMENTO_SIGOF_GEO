@@ -12,12 +12,13 @@ def calcular_limite_atual():
     df = df[df['Contabilizar no Limite?'] == 'SIM']
     df = df[df['Situação'] == 'Publicado']
 
-
-
     valor_utilizado = df['Valor'].sum()
     return {
         "valor_utilizado": valor_utilizado,
         "valor_limite": VALOR_DO_LIMITE,
         "valor_disponivel": VALOR_DO_LIMITE - valor_utilizado,
-        "orcamento_aprovado": ORÇAMENTO_APROVADO_2025
+        "orcamento_aprovado": ORÇAMENTO_APROVADO_2025,
+        "percentual_executado_limite": (valor_utilizado / VALOR_DO_LIMITE) * 100,
+        "percentual_executado_total": (valor_utilizado / ORÇAMENTO_APROVADO_2025) * 100
+        
     }

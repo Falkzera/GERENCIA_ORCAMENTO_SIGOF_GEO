@@ -80,15 +80,15 @@ def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):
 
     return ano, mes, df_filtrado, df_mes_anterior
 
-ano, mes, df_filtrado, df_filtado_mes_anterior = filtro_ano_mes(df, exibir_na_tela=False, key_prefix="home")
+ano, mes, df_filtrado, df_filtrado_mes_anterior = filtro_ano_mes(df, exibir_na_tela=False, key_prefix="home")
 
 
 with st.container():  # CONSTRUÇÃO DE MÉTRICAS INICIAIS
 
     QUANTIDADE_DE_PROCESSOS = df_filtrado.shape[0]
-    mes_anterior = df_filtado_mes_anterior['Mês'].unique()[0] if not df_filtado_mes_anterior.empty else None
+    mes_anterior = df_filtrado_mes_anterior['Mês'].unique()[0] if not df_filtrado_mes_anterior.empty else None
 
-def montar_relatorio_pdf(ano, mes, df_filtrado, df_filtado_mes_anterior):
+def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
 
 # with st.container():  # RELATÓRIO CPOF
 #     pass
@@ -141,7 +141,7 @@ def montar_relatorio_pdf(ano, mes, df_filtrado, df_filtado_mes_anterior):
         )
 
         qtd_processos_valores = df_filtrado['Valor'].sum()
-        qtd_processos_valores_mes_anterior = df_filtado_mes_anterior['Valor'].sum()
+        qtd_processos_valores_mes_anterior = df_filtrado_mes_anterior['Valor'].sum()
         diferenca = qtd_processos_valores - qtd_processos_valores_mes_anterior
         maior_que_atual = qtd_processos_valores - qtd_processos_valores_mes_anterior
 

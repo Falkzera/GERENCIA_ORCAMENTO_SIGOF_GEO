@@ -1,0 +1,1 @@
+Aqui guarda as funções de resumos orçamentarios e de publicados que aparecem em visualizar.

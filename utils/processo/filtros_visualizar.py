@@ -1,13 +1,15 @@
 
 import io
+import re
 import pandas as pd
 import streamlit as st
 
 from datetime import datetime
 from streamlit_tags import st_tags
+from src.base import load_base_data
 from utils.formatar.formatar_valor import formatar_valor
 from utils.digitacao.digitacao import mes_por_extenso, por_extenso_reais, por_extenso
-
+from utils.calculo_limite.limite import calcular_limite_atual
 
 def configurar_estado_ano_mes(df: pd.DataFrame):
     hoje = datetime.today()
@@ -125,6 +127,7 @@ def filtros_de_busca(df_filtrado):
 
 def resumo_processo_orcamentario(df_filtrado):
     st.subheader("Gerarador de Resumos 📄")
+    # st.caption("Os resumos aparecem conforme os filtros aplicados na tabela.")
 
     def formatar_linha(numero):
         linha = df_filtrado[df_filtrado["Nº do Processo"] == numero].iloc[0]
@@ -195,3 +198,66 @@ def resumo_processo_orcamentario(df_filtrado):
     )
     else:
         st.warning("Selecione um número de processo para visualizar o resumo.")
+
+
+def resumo_processo_publicado():
+
+    load_base_data(forcar_recarregar=True)
+
+    hoje = datetime.now().date()
+
+    datas_disponiveis = st.session_state.base['Data de Publicação'].dropna().unique()
+    datas_disponiveis = [data for data in datas_disponiveis if re.match(r"\d{2}/\d{2}/\d{4}", data)]
+    datas_disponiveis = [datetime.strptime(data, "%d/%m/%Y").date() for data in datas_disponiveis]
+
+    datas_disponiveis.append(hoje)
+    datas_disponiveis.sort(reverse=True)
+
+    hoje = st.selectbox(
+        label="Datas disponíveis:",
+        options=datas_disponiveis,
+        format_func=lambda x: x.strftime("%d/%m/%Y"), 
+    )
+
+    st.session_state.data_atual = hoje.strftime("%d/%m/%Y")
+
+    st.subheader(f"Resumos de Créditos Publicados - ({st.session_state.data_atual}) 📅")
+
+    df_resumo_publicado = st.session_state.base[st.session_state.base['Data de Publicação'] == st.session_state.data_atual]
+
+    if df_resumo_publicado.empty:
+        st.info(f"⚠️ Não há processos publicados em ({st.session_state.data_atual}).")
+        st.stop()
+
+    if df_resumo_publicado is not df_resumo_publicado.empty:
+
+        st.success(f"{(len(df_resumo_publicado))} ({por_extenso(len(df_resumo_publicado)).title()}) Processos Publicados em ({st.session_state.data_atual}).")
+
+        colunas_escolhidas = ['Órgão (UO)','Nº do decreto', 'Fonte de Recursos', 'Valor']
+        limite = calcular_limite_atual()
+
+        descricao_texto = f"_Relação dos *Publicados em {st.session_state.data_atual}*_\n\n"
+        for index, row in df_resumo_publicado.iterrows():
+            descricao = f""
+            for coluna in colunas_escolhidas:
+                if coluna == 'Órgão (UO)':
+                    descricao += f"*{row[coluna]}*"
+                if coluna == 'Nº do decreto':
+                    numero = ''.join(filter(str.isdigit, str(row[coluna])))
+                    valor_formatado = f"{numero[:3]}.{numero[3:-1]}"
+                    descricao += f" - Decreto Nº *{valor_formatado}*"
+                if coluna == 'Fonte de Recursos':
+                    descricao += f" - Fonte *{row[coluna]}*"
+                if coluna == 'Valor':
+                    descricao += f" - *{formatar_valor(row[coluna])}*"
+            descricao_texto += descricao + "\n"
+
+        descricao_texto += "\n"
+        
+        descricao_texto += f"Total publicado no dia (somando os processos especiais e de poderes que não contam para o limite): *{formatar_valor(df_resumo_publicado['Valor'].sum())}*. Portanto, *atualizando o limite para {limite['percentual_executado_total']:.2f}%*, representando um *valor utilizado de {formatar_valor(limite['valor_utilizado'])}* do total autorizado ({formatar_valor(limite['valor_limite'])}) totalizando um saldo de *{formatar_valor(limite['valor_disponivel'])}*. \n\n"
+
+        output = io.BytesIO()
+        output.write(descricao_texto.encode("utf-8"))
+        output.seek(0)
+
+        st.text_area("📝 Resultados:", descricao_texto, height=230)

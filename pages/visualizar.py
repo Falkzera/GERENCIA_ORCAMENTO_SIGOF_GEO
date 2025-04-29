@@ -10,7 +10,7 @@ from utils.digitacao.digitacao import mes_por_extenso
 from sidebar.page_editar import mudar_pagina_editar
 from utils.sessao.login import verificar_permissao
 from utils.processo.edicao_processo import formulario_edicao_processo
-from utils.processo.filtros_visualizar import aplicar_filtro_ano_mes, configurar_estado_ano_mes, filtros_de_busca, resumo_processo_orcamentario
+from utils.processo.filtros_visualizar import aplicar_filtro_ano_mes, configurar_estado_ano_mes, filtros_de_busca, resumo_processo_orcamentario, resumo_processo_publicado
 from utils.formatar.formatar_valor import formatar_valor
 
 from utils.marca.creditos import desenvolvido
@@ -73,9 +73,16 @@ if escolha == "Processos de Execução Orçamentária":
 
 
     st.write('---')
+    st.subheader("Outras Opções ⚙️")
+    st.caption("Clique para expandir as opções.")
     
     df_filtrado['Valor'] = df_filtrado['Valor'].apply(formatar_valor)
-    resumo_processo_orcamentario(df_filtrado)
+
+    with st.expander("⚙️ - Resumo dos Processos Cadastrados", expanded=False):
+        resumo_processo_orcamentario(df_filtrado)
+
+    with st.expander("⚙️ - Resumo dos Processos Publicados", expanded=False):
+        resumo_processo_publicado()
 
 elif escolha == "Processos  de TED":
     # df_ted = st.session_state.base_ted.copy()
