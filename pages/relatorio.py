@@ -13,8 +13,6 @@ from utils.sessao.login import verificar_permissao
 from utils.marca.creditos import desenvolvido
 from utils.digitacao.digitacao import mes_por_extenso  # Só se precisar
 
-# st.set_page_config(page_title="Relatórios", page_icon='', layout="wide")
-
 with st.container():  # PÁGINAS E CONFIGURAÇÃO SIDEBAR
     verificar_permissao()
     sem_display()
@@ -25,7 +23,6 @@ with st.container():  # PÁGINAS E CONFIGURAÇÃO SIDEBAR
     mudar_pagina_home()
     desenvolvido()
     
-
 st.subheader("Relatório CPOF 📊")
 
 load_base_data(forcar_recarregar=True)  
@@ -48,7 +45,6 @@ botao_gerar_e_baixar_arquivo(
     nome_arquivo=f"Relatorio_CPOF_{mes_por_extenso(mes)}_{ano}.pdf",
     tipo_arquivo="pdf"
 )
-
 
 from utils.estilizacao.background import wallpaper
 wallpaper()

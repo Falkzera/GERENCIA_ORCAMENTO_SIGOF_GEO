@@ -25,7 +25,6 @@ with st.container(): # CÁLCULO DO LIMITE (retirado de utils/calculo_limite/limi
     VALOR_DO_LIMITE = limite["valor_limite"]
     ORÇAMENTO_APROVADO_2025 = limite["orcamento_aprovado"]
 
-
 with st.container():  # LIMPAR A SESSÃO PARA OS GRÁFICOS E TABELS
 
     # 🔁 Limpa conteúdo acumulado (se não estiver gerando PDF)
@@ -82,16 +81,12 @@ def filtro_ano_mes(df: pd.DataFrame, exibir_na_tela=True, key_prefix="filtro"):
 
 ano, mes, df_filtrado, df_filtrado_mes_anterior = filtro_ano_mes(df, exibir_na_tela=False, key_prefix="home")
 
-
 with st.container():  # CONSTRUÇÃO DE MÉTRICAS INICIAIS
 
     QUANTIDADE_DE_PROCESSOS = df_filtrado.shape[0]
     mes_anterior = df_filtrado_mes_anterior['Mês'].unique()[0] if not df_filtrado_mes_anterior.empty else None
 
 def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
-
-# with st.container():  # RELATÓRIO CPOF
-#     pass
 
     titulo_dinamico(f"# Relatório de {mes_por_extenso(mes)} / {ano}")
 
@@ -220,25 +215,26 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
             procedimentos complementares.'''
         )
 
+        # qtd_processos_sem_cobertura = df_filtrado[df_filtrado['Origem de Recursos'].str.startswith('Sem Cobertura')].shape[0]
+        qtd_processos_credito_suplementar = df_filtrado[df_filtrado['Tipo de Crédito'] == 'Suplementar'].shape[0]
+        qtd_processos_credito_suplementar_valores = df_filtrado[df_filtrado['Tipo de Crédito'] == 'Suplementar']['Valor'].sum()
         digitacao(
             f'''Durante o mês de {mes_por_extenso(mes)} do exercício orçamentário de {ano}, foram solicitados um total de
-            {qtd_processos} ({por_extenso(qtd_processos)}), totalizando uma quantia de {formatar_valor(qtd_processos_valores)} ({por_extenso_reais(qtd_processos_valores)}), de
-            créditos suplementares, presentes no Quadro 1:'''
+            {qtd_processos_credito_suplementar} ({por_extenso(qtd_processos_credito_suplementar)}), totalizando uma quantia de {formatar_valor(qtd_processos_credito_suplementar_valores)} ({por_extenso_reais(qtd_processos_credito_suplementar_valores)}), de
+            créditos suplementares, presentes no quadro abaixo.'''
         )
 
         # Ordenação por Valor (decrescente) e Órgão (crescente)
-        df_filtrado_tabela = df_filtrado[['Órgão (UO)', 'Nº do Processo', 'Fonte de Recursos', 'Grupo de Despesas', 'Valor']] \
+        df_filtrado_tabela = df_filtrado[df_filtrado['Tipo de Crédito'] == 'Suplementar'][['Órgão (UO)', 'Nº do Processo', 'Fonte de Recursos', 'Grupo de Despesas', 'Valor']] \
             .sort_values(by=['Órgão (UO)', 'Valor'], ascending=[False, False]).copy()
 
         # Formata os valores após ordenação
         df_filtrado_tabela['Valor'] = df_filtrado_tabela['Valor'].apply(formatar_valor)
 
-        # Mostra no PDF
         mostrar_tabela_pdf(
             df_filtrado_tabela,
             nome_tabela='Processos de Créditos Suplementares'
         )
-
 
     with st.container():  # 2.1.1.1 - ORIGEM DE RECURSOS E SEUS DIVERSOS TIPOS DE CPREDITO -> FUNÇÃO: gerar_relatorio_origem_recurso_com_graficos
 
@@ -269,7 +265,6 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
             '6': '6 - Outras Despesas de Capital',
             '3 e 4': '3 e 4 - Outras Despesas e Investimentos'}
 
-        total_processos_por_grupo = df_filtrado.groupby('Grupo de Despesas').size().reset_index(name='Total de Processos')
         grupo_despesa = df_filtrado.groupby('Grupo de Despesas')['Valor'].sum().reset_index()
         total_valor = grupo_despesa['Valor'].sum()
         grupo_despesa['Percentual'] = (grupo_despesa['Valor'] / total_valor) * 100
@@ -302,9 +297,6 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
             
         titulo_dinamico(f"## 4 - Créditos Públicados")
 
-        # de df_fitlrado selecionar apenas os processos com Situação = "Publicada"
-
-
         df['Data de Publicação'] = pd.to_datetime(df['Data de Publicação'], format='%d/%m/%Y', errors='coerce')
         df_publicados = df[
             (df['Situação'] == 'Publicado') &
@@ -313,10 +305,10 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
         ]
 
         df_publicados.reset_index(drop=True, inplace=True)
-        # qwuantidade de processos publicados
         qtd_publicados = df_publicados.shape[0]
         qtd_publicados_valores = df_publicados['Valor'].sum()
         df_tabela_publicados = df_publicados[['Órgão (UO)', 'Nº do Processo', 'Fonte de Recursos' , 'Valor', ]]
+        df_tabela_publicados['Valor'] = df_tabela_publicados['Valor'].apply(formatar_valor)
 
 
         digitacao(
@@ -353,8 +345,14 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
             {formatar_valor(VALOR_DO_LIMITE)} ({por_extenso_reais(VALOR_DO_LIMITE)}).'''
         )
 
-        valor_orcamento_anual_e_executado = (VALOR_UTILIZADO_LIMITE / ORÇAMENTO_APROVADO_2025) * 100
-        valor_limite_sobre_usado = (VALOR_UTILIZADO_LIMITE / VALOR_DO_LIMITE) * 100
+        df_calculo_limite_mes_corrente = df[
+            (df['Situação'] == 'Publicado') &
+            (df['Data de Publicação'].dt.year == ano) &
+            (df['Data de Publicação'].dt.month <= mes)
+        ]
+
+        valor_utilizado_limite = df_calculo_limite_mes_corrente['Valor'].sum()
+        valor_limite_sobre_usado = (valor_utilizado_limite / VALOR_DO_LIMITE) * 100
 
         gerar_grafico_pizza(
             labels=["Executado", "Disponível"],
@@ -367,8 +365,7 @@ def montar_relatorio_cpof(ano, mes, df_filtrado, df_filtrado_mes_anterior):
         df_limite = pd.DataFrame({
             'Orçamento Aprovado 2025': [formatar_valor(ORÇAMENTO_APROVADO_2025)],
             'Valor do Limite (10%)': [formatar_valor(VALOR_DO_LIMITE)],
-            'Valor Utilizado': [formatar_valor(VALOR_UTILIZADO_LIMITE)],
-            'Disponível': [formatar_valor(VALOR_DO_LIMITE - VALOR_UTILIZADO_LIMITE)]
+            'Valor Utilizado': [formatar_valor(valor_utilizado_limite)],
+            'Disponível': [formatar_valor(VALOR_DO_LIMITE - valor_utilizado_limite)]
         })
         mostrar_tabela_pdf(df_limite, nome_tabela='Limite de Crédito')
-

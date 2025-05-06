@@ -1,8 +1,6 @@
 import streamlit as st
-import pandas as pd
 from datetime import datetime
 from utils.buscadores.situacao import opcoes_situacao
-from src.base import load_base_data
 
 def formulario_edicao_processo_em_bloco():
     processos = st.session_state.get("processos_edicao_massa", [])
@@ -42,7 +40,6 @@ def formulario_edicao_processo_em_bloco():
             st.error(f"❌ Erro ao atualizar a planilha: {e}")
             st.stop()
 
-        # Limpa o estado
         del st.session_state["processos_edicao_massa"]
         
         st.rerun()
