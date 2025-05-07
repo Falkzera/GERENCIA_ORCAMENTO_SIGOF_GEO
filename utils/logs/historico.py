@@ -18,7 +18,6 @@ def salvar_modificacao(processo_id, modificacao, usuario):
         df = pd.DataFrame(df)  
         df = pd.concat([df, pd.DataFrame([nova_modificacao])], ignore_index=True)
         conn.update(worksheet="Histórico de Modificações", data=df)
-        st.success("✅ ✔️ Modificação salva com sucesso no Google Sheets.")
     except Exception as e:
         st.error(f"Erro ao salvar a modificação: {e}")
         st.stop()

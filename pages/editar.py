@@ -83,7 +83,7 @@ with st.container(): # MAIN
         else:
             processo["Nº do decreto"] = "" # Também é aceito número de decreto vazio
 
-        with st.expander("Editar Processo 📁", expanded=False): 
+        with st.expander("Editar Processo 📁", expanded=True): 
             with st.form("form_edicao"): # CONSTRUÇÃO DO FORMS PARA EDIÇÃO
 
                 def editar_select(label, opcoes, coluna): # Função para Construção dos Campos de selectbox.
@@ -256,17 +256,17 @@ with st.container(): # MAIN
                 mostrar_tabela(base[base["Nº do Processo"] == novo_processo], altura_max_linhas=99, nome_tabela="Processo Editado!", mostrar_na_tela=True) # Visualização do processo editado
 
     st.write('---')
+with st.expander("Histórico de Modificações 📁", expanded=False): 
+    st.subheader("Histórico de Modificações")
+    if not processo_edit:
+        st.info("⚠️ Selecione um processo para visualizar o histórico de modificações.")
 
-st.subheader("Histórico de Modificações")
-if not processo_edit:
-    st.info("⚠️ Selecione um processo para visualizar o histórico de modificações.")
+    if processo_edit:
+        load_historico_data(forcar_recarregar=True) # Carrega o histórico de modificações
 
-if processo_edit:
-    load_historico_data(forcar_recarregar=True) # Carrega o histórico de modificações
-
-    if pd.notna(processo["Cadastrado Por"]):
-        st.markdown(f"```plaintext\nProcesso cadastrado por: {processo['Cadastrado Por']}\n```")
-    exibir_historico(processo_edit) # Exibe o histórico de modificações do processo editado
+        if pd.notna(processo["Cadastrado Por"]):
+            st.markdown(f"```plaintext\nProcesso cadastrado por: {processo['Cadastrado Por']}\n```")
+        exibir_historico(processo_edit) # Exibe o histórico de modificações do processo editado
 
 from utils.estilizacao.background import wallpaper
 wallpaper()
