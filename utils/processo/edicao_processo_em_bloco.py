@@ -2,6 +2,8 @@ import streamlit as st
 from datetime import datetime
 from utils.buscadores.situacao import opcoes_situacao
 
+from utils.logs.historico import salvar_modificacao
+
 def formulario_edicao_processo_em_bloco():
     processos = st.session_state.get("processos_edicao_massa", [])
     base = st.session_state.base
@@ -24,12 +26,28 @@ def formulario_edicao_processo_em_bloco():
         usuario = st.session_state.username.title()
         modificados = 0
 
+        # for proc in processos:
+        #     indices = base[base["Nº do Processo"] == proc].index
+        #     if not indices.empty:
+        #         base.loc[indices, "Situação"] = nova_situacao
+        #         base.loc[indices, "Última Edição"] = f"{usuario} - {agora.strftime('%d/%m/%Y %H:%M:%S')}"
+        #         modificados += 1
+
+
         for proc in processos:
             indices = base[base["Nº do Processo"] == proc].index
             if not indices.empty:
-                base.loc[indices, "Situação"] = nova_situacao
-                base.loc[indices, "Última Edição"] = f"{usuario} - {agora.strftime('%d/%m/%Y %H:%M:%S')}"
-                modificados += 1
+                situacao_antiga = base.loc[indices[0], "Situação"]
+
+                if situacao_antiga != nova_situacao:
+                    base.loc[indices, "Situação"] = nova_situacao
+                    base.loc[indices, "Última Edição"] = f"{usuario} - {agora.strftime('%d/%m/%Y %H:%M:%S')}"
+                    modificados += 1
+
+                    # Registra no log de modificações
+                    descricao = f"Situação: {situacao_antiga} -> {nova_situacao}"
+                    salvar_modificacao(proc, descricao, usuario)
+
 
         try:
             from streamlit_gsheets import GSheetsConnection

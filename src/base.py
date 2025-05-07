@@ -57,3 +57,14 @@ def load_base_ted(forcar_recarregar=False):
         # base_ted.loc[mask_concluido, "Situação"] = "CONCLUIDO"
         # conn.update(base_ted, worksheet="TED")
         # st.session_state.base_ted = base_ted
+
+def load_historico_data(forcar_recarregar=False):
+    if "historico" not in st.session_state or forcar_recarregar:
+        with st.spinner("🔄 Carregando histórico..."):
+            conn = st.connection("gsheets", type=GSheetsConnection)
+            base = conn.read(worksheet="Histórico de Modificações", ttl=0)
+            if base is None:
+                st.error("❌ A aba 'Histórico de Modificações' foi encontrada, mas está vazia (sem cabeçalho ou sem dados).")
+            else:
+                st.session_state.historico = pd.DataFrame(base)
+                

@@ -1,65 +1,67 @@
-import json
-import os
-import streamlit as st
-from datetime import datetime
-
-# Função para carregar o histórico de modificações
-def carregar_historico():
-    if os.path.exists('historico_modificacoes.json'):
-        with open('historico_modificacoes.json', 'r') as f:
-            return json.load(f)
-    else:
-        return {}
-
-# Função para salvar a modificação no histórico
 import pandas as pd
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
 
 def salvar_modificacao(processo_id, modificacao, usuario):
-    # Conexão com o Google Sheets
     conn = st.connection("gsheets", type=GSheetsConnection)
-    
-    # Data e hora da modificação
     agora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    # Preparar dados para salvar no Google Sheets
-    nova_modificacao = [processo_id, agora, modificacao, usuario]
-    
+    nova_modificacao = {
+        "Processo ID": processo_id,
+        "Data e Hora": agora,
+        "Modificação": modificacao,
+        "Usuário": usuario
+    }
     try:
-        # Conectar ao Google Sheets e obter o worksheet da aba "Histórico de Modificações"
-        worksheet = conn.read(worksheet="Histórico de Modificações", ttl=0)
-        
-        # Utiliza append_row para adicionar a nova modificação na planilha
-        # worksheet.append_row adiciona a nova linha ao final da planilha
-        conn.append_row(worksheet="Histórico de Modificações", row=nova_modificacao)
-        
+        # Lê os dados atuais
+        df = conn.read(worksheet="Histórico de Modificações", ttl=0)
+        df = pd.DataFrame(df)  
+        df = pd.concat([df, pd.DataFrame([nova_modificacao])], ignore_index=True)
+        conn.update(worksheet="Histórico de Modificações", data=df)
         st.success("✅ ✔️ Modificação salva com sucesso no Google Sheets.")
     except Exception as e:
         st.error(f"Erro ao salvar a modificação: {e}")
         st.stop()
 
+def exibir_historico(processo_edit):
+    if not processo_edit:
+        st.info("Selecione um processo para visualizar o histórico.")
+        return
 
-
-def exibir_historico(processo_id):
-    # Conectar ao Google Sheets
     conn = st.connection("gsheets", type=GSheetsConnection)
-    
-    # Carregar a aba de Histórico de Modificações
-    worksheet = conn.read(worksheet="Histórico de Modificações", ttl=0)
-    
-    # Filtrar modificações por processo_id
-    modificacoes = worksheet.get_all_values()
-    modificacoes_filtradas = [mod for mod in modificacoes if mod[0] == processo_id]
+    df = pd.DataFrame(conn.read(worksheet="Histórico de Modificações", ttl=0))
 
-    # Exibir o histórico filtrado
-    if modificacoes_filtradas:
-        st.write(f"### Histórico de Modificações para o Processo {processo_id}")
-        for mod in modificacoes_filtradas:
-            st.write(f"- **Data**: {mod[1]}")
-            st.write(f"- **Modificação**: {mod[2]}")
-            st.write(f"- **Usuário**: {mod[3]}")
-            st.write("---")
-    else:
-        st.write("Nenhuma modificação registrada para este processo.")
+    # Filtrar pelo processo selecionado
+    df = df[df["Processo ID"] == processo_edit]
+
+    if df.empty:
+        st.warning("⚠️ Nenhuma modificação registrada para este processo.")
+        return
+
+    # Criar uma coluna de agrupamento por minuto
+    df["Grupo"] = df.apply(lambda row: f"{row['Usuário']} — {row['Data e Hora'][:16]}", axis=1)  # 'YYYY-MM-DD HH:MM'
+
+    # Ordenar cronologicamente por esse agrupamento
+    df = df.sort_values(by="Data e Hora", ascending=False)
+
+    # Agrupar
+    agrupado = {}
+    for _, row in df.iterrows():
+        grupo = row["Grupo"]
+        if grupo not in agrupado:
+            agrupado[grupo] = []
+        agrupado[grupo].append(row["Modificação"])
+
+    # Montar a estrutura hierárquica
+    estrutura = f"📁 Histórico de Modificações — Processo: {processo_edit}\n"
+    linhas = []
+    grupos = list(agrupado.items())
+    for i, (grupo, modificacoes) in enumerate(grupos):
+        con_grupo = "└──" if i == len(grupos) - 1 else "├──"
+        linhas.append(f"{con_grupo} 📂 {grupo}")
+        for j, mod in enumerate(modificacoes):
+            con_mod = "    └──" if j == len(modificacoes) - 1 else "    ├──"
+            linhas.append(f"{con_mod} 📝 {mod}")
+
+    estrutura += "\n".join(linhas)
+    st.markdown("```plaintext\n" + estrutura + "\n```")

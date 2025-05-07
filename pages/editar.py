@@ -21,6 +21,7 @@ from utils.estilizacao.dataframe import mostrar_tabela
 from utils.formatar.formatar_numero_decreto import formatar_numero_decreto
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from src.base import load_base_data
+from src.base import load_historico_data
 from utils.sessao.login import verificar_permissao
 from utils.marca.creditos import  desenvolvido
 from utils.logs.historico import salvar_modificacao, exibir_historico
@@ -82,42 +83,43 @@ with st.container(): # MAIN
         else:
             processo["Nº do decreto"] = "" # Também é aceito número de decreto vazio
 
-        with st.form("form_edicao"): # CONSTRUÇÃO DO FORMS PARA EDIÇÃO
+        with st.expander("Editar Processo 📁", expanded=False): 
+            with st.form("form_edicao"): # CONSTRUÇÃO DO FORMS PARA EDIÇÃO
 
-            def editar_select(label, opcoes, coluna): # Função para Construção dos Campos de selectbox.
-                valor_atual = processo[coluna]
-                return st.selectbox(f"{label} (Editar)", opcoes, index=opcoes.index(valor_atual))
+                def editar_select(label, opcoes, coluna): # Função para Construção dos Campos de selectbox.
+                    valor_atual = processo[coluna]
+                    return st.selectbox(f"{label} (Editar)", opcoes, index=opcoes.index(valor_atual))
 
-            def editar_texto(label, coluna, tipo="input"): # Função para Construção dos Campos de texto.
-                if tipo == "area":
-                    return st.text_area(f"{label} (Editar)", value=processo[coluna])
-                return st.text_input(f"{label} (Editar)", value=processo[coluna])
-            
-            # TODOS OS CAMPOS E OPÇÕES POSSÍVEIS!
-            nova_situacao = editar_select("Situação", opcoes_situacao, "Situação")
-            nova_origem = editar_select("Origem de Recursos", opcoes_origem_recursos, "Origem de Recursos")
-            novo_orgao = editar_select("Órgão (UO)", opcoes_orgao_uo, "Órgão (UO)")
-            novo_contabilizar_limite = editar_select("Contabilizar no Limite?", opcoes_contabilizar_limite, "Contabilizar no Limite?")
-            novo_processo = editar_texto("Nº do Processo", "Nº do Processo")
-            novo_tipo_credito = editar_select("Tipo de Crédito", opcoes_tipo_credito, "Tipo de Crédito")
-            nova_fonte = editar_select("Fonte de Recursos", opcoes_fonte_recurso, "Fonte de Recursos")
-            novo_grupo = editar_select("Grupo de Despesas", opcoes_grupo_despesa, "Grupo de Despesas")
-            valor_edit = st.text_input("Valor (Editar)", value=str(formatar_valor_sem_cifrao(processo["Valor"])))
-            objetivo_edit = editar_texto("Objetivo", "Objetivo", tipo="area")
-            observacao_edit = st.text_input("Observação (Editar)", value="" if pd.isna(processo["Observação"]) else processo["Observação"])
-            data_recebimento_edit = st.text_input("Data de Recebimento (Editar)", value=processo["Data de Recebimento"])
-            data_publicacao_edit = st.text_input("Data de Publicação (Editar)", value="" if pd.isna(processo["Data de Publicação"]) else processo["Data de Publicação"])
+                def editar_texto(label, coluna, tipo="input"): # Função para Construção dos Campos de texto.
+                    if tipo == "area":
+                        return st.text_area(f"{label} (Editar)", value=processo[coluna])
+                    return st.text_input(f"{label} (Editar)", value=processo[coluna])
+                
+                # TODOS OS CAMPOS E OPÇÕES POSSÍVEIS!
+                nova_situacao = editar_select("Situação", opcoes_situacao, "Situação")
+                nova_origem = editar_select("Origem de Recursos", opcoes_origem_recursos, "Origem de Recursos")
+                novo_orgao = editar_select("Órgão (UO)", opcoes_orgao_uo, "Órgão (UO)")
+                novo_contabilizar_limite = editar_select("Contabilizar no Limite?", opcoes_contabilizar_limite, "Contabilizar no Limite?")
+                novo_processo = editar_texto("Nº do Processo", "Nº do Processo")
+                novo_tipo_credito = editar_select("Tipo de Crédito", opcoes_tipo_credito, "Tipo de Crédito")
+                nova_fonte = editar_select("Fonte de Recursos", opcoes_fonte_recurso, "Fonte de Recursos")
+                novo_grupo = editar_select("Grupo de Despesas", opcoes_grupo_despesa, "Grupo de Despesas")
+                valor_edit = st.text_input("Valor (Editar)", value=str(formatar_valor_sem_cifrao(processo["Valor"])))
+                objetivo_edit = editar_texto("Objetivo", "Objetivo", tipo="area")
+                observacao_edit = st.text_input("Observação (Editar)", value="" if pd.isna(processo["Observação"]) else processo["Observação"])
+                data_recebimento_edit = st.text_input("Data de Recebimento (Editar)", value=processo["Data de Recebimento"])
+                data_publicacao_edit = st.text_input("Data de Publicação (Editar)", value="" if pd.isna(processo["Data de Publicação"]) else processo["Data de Publicação"])
 
-            if pd.notna(processo["Nº do decreto"]): # Verifica se o número do decreto não é vazio
-                numero_decreto_edit = st.text_input(
-                    "Nº do Decreto (Editar)", 
-                    value=str(formatar_numero_decreto(str(processo["Nº do decreto"])))) # Garante que o número do decreto seja exibido no formato correto com a função "formatar_numero_decreto"
-            else:
-                numero_decreto_edit = st.text_input("Nº do Decreto (Editar)", value="") # Aceitando também preenchimento vazio!
+                if pd.notna(processo["Nº do decreto"]): # Verifica se o número do decreto não é vazio
+                    numero_decreto_edit = st.text_input(
+                        "Nº do Decreto (Editar)", 
+                        value=str(formatar_numero_decreto(str(processo["Nº do decreto"])))) # Garante que o número do decreto seja exibido no formato correto com a função "formatar_numero_decreto"
+                else:
+                    numero_decreto_edit = st.text_input("Nº do Decreto (Editar)", value="") # Aceitando também preenchimento vazio!
 
-            st.write('---')
+                st.write('---')
 
-            salvar = st.form_submit_button("Salvar Edição", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁') # Salvando o forms
+                salvar = st.form_submit_button("Salvar Edição", use_container_width=True, type="primary", help='Clique para salvar a edição do processo na base 📁') # Salvando o forms
 
     # exibir_historico()
     if salvar: # Lógicas de verificações após clicar em SALVAR! Só será salvo caso passe por todoas as verificações!!!
@@ -232,6 +234,9 @@ with st.container(): # MAIN
                     for mod in modificacoes:
                         st.write(f"- {mod}")
 
+                    for mod in modificacoes:
+                        salvar_modificacao(processo_edit, mod, st.session_state.username.title())
+
                 # if modificacoes:  # Mostrar a destrinchação do que foi modificado
                 #     # Adiciona a última edição à lista de modificações
                 #     modificacoes.append(f"Última Edição: {st.session_state.base.loc[row_index, 'Última Edição']} -> {st.session_state.username.title() + ' - ' + agora.strftime('%d/%m/%Y %H:%M:%S')}")
@@ -252,6 +257,16 @@ with st.container(): # MAIN
 
     st.write('---')
 
+st.subheader("Histórico de Modificações")
+if not processo_edit:
+    st.info("⚠️ Selecione um processo para visualizar o histórico de modificações.")
+
+if processo_edit:
+    load_historico_data(forcar_recarregar=True) # Carrega o histórico de modificações
+
+    if pd.notna(processo["Cadastrado Por"]):
+        st.markdown(f"```plaintext\nProcesso cadastrado por: {processo['Cadastrado Por']}\n```")
+    exibir_historico(processo_edit) # Exibe o histórico de modificações do processo editado
 
 from utils.estilizacao.background import wallpaper
 wallpaper()

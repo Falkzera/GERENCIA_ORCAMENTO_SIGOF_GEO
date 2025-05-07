@@ -188,6 +188,10 @@ def formulario_edicao_processo():
                     st.write("### Modificações realizadas:")
                     for mod in modificacoes:
                         st.write(f"- {mod}")
+                    
+                    for mod in modificacoes:
+                        salvar_modificacao(processo_edit, mod, st.session_state.username.title())
+
 
                 # if modificacoes:  # Mostrar a destrinchação do que foi modificado
                 #     modificacoes.append(f"Última Edição: {st.session_state.base.loc[row_index, 'Última Edição']} -> {st.session_state.username.title() + ' - ' + agora.strftime('%d/%m/%Y %H:%M:%S')}")
