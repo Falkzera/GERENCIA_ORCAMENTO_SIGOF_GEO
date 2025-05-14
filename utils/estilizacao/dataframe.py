@@ -21,11 +21,11 @@ CSS_CUSTOMIZADO = {
     ".ag-header-cell-label": {
         "color": "#ffffff !important",
         "font-weight": "650",
-        "font-size": "16px",
+        "font-size": "12px",
         "justify-content": "center",
     },
     ".ag-cell": {
-        "font-size": "14px",
+        "font-size": "12px",
         "line-height": "1.4",
         "border-color": "#e6e6e6",
     },

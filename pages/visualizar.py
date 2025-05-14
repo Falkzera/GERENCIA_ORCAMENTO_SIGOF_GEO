@@ -40,6 +40,8 @@ if escolha == "Processos de Execução Orçamentária":
         st.rerun()
 
     df_filtrado, selected_row = mostrar_tabela(df_filtrado, mostrar_na_tela=True, enable_click=True)
+    valor_total = df_filtrado["Valor"].sum()
+    st.write(f"**Valor Total dos Processos:** {formatar_valor(valor_total)}")
 
     editar_em_bloco = st.checkbox("Editar processos em bloco?", value=False)
 
@@ -95,8 +97,6 @@ if escolha == "Processos de Execução Orçamentária":
             except KeyError:
                 st.info("⚠️ Para editar um processo, saia do modo Pivot.")
 
-
-
     st.write('---')
     st.subheader("Outras Opções ⚙️")
     st.caption("Clique para expandir as opções.")
@@ -108,9 +108,6 @@ if escolha == "Processos de Execução Orçamentária":
 
     with st.expander("⚙️ - Resumo dos Processos Publicados", expanded=False):
         resumo_processo_publicado()
-
-
-
 
 elif escolha == "Processos  de TED":
     # df_ted = st.session_state.base_ted.copy()
