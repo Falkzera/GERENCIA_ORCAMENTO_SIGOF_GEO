@@ -26,6 +26,7 @@ from utils.sessao.login import verificar_permissao
 from utils.marca.creditos import  desenvolvido
 from utils.logs.historico import salvar_modificacao, exibir_historico
 from datetime import datetime
+from sidebar.botao_logout import criar_botao_logout
 
 
 st.set_page_config(
@@ -42,6 +43,7 @@ with st.container(): # SIDEBAR
     mudar_pagina_visualizar_processo()
     mudar_pagina_relatorio()
     mudar_pagina_home()
+    criar_botao_logout()
     desenvolvido()
 
 with st.container(): # Recarregamento da BASE

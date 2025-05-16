@@ -21,7 +21,7 @@ ano_corrente = datetime.now().year
 from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.sessao.login import verificar_permissao
 from utils.marca.creditos import  desenvolvido
-
+from sidebar.botao_logout import criar_botao_logout
 
 
 st.set_page_config(
@@ -36,6 +36,7 @@ mudar_pagina_visualizar_processo()
 mudar_pagina_editar()
 mudar_pagina_home()
 mudar_pagina_relatorio()
+criar_botao_logout()
 desenvolvido()
 
 from utils.estilizacao.background import wallpaper

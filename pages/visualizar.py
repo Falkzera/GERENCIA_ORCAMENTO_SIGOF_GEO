@@ -12,6 +12,7 @@ from utils.processo.edicao_processo import formulario_edicao_processo
 from utils.processo.filtros_visualizar import filtros_de_busca, resumo_processo_orcamentario, resumo_processo_publicado
 from utils.formatar.formatar_valor import formatar_valor
 from utils.processo.edicao_processo_em_bloco import formulario_edicao_processo_em_bloco
+from sidebar.botao_logout import criar_botao_logout
 
 from utils.marca.creditos import desenvolvido
 
@@ -22,6 +23,7 @@ mudar_pagina_cadastrar_processo()
 mudar_pagina_editar()
 mudar_pagina_home()
 mudar_pagina_relatorio()
+criar_botao_logout()
 desenvolvido()
 
 st.header("Visualização dos Processos Cadastrados 📁")

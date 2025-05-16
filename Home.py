@@ -21,6 +21,7 @@ from sidebar.page_relatorio import mudar_pagina_relatorio
 from utils.calculo_limite.limite import calcular_limite_atual
 from utils.marca.creditos import desenvolvido
 from utils.buscadores.situacao import mapa_cores_situacao
+from sidebar.botao_logout import criar_botao_logout
 
 sem_display()
 customizar_sidebar()
@@ -28,6 +29,7 @@ mudar_pagina_cadastrar_processo()
 mudar_pagina_visualizar_processo()
 mudar_pagina_editar()
 mudar_pagina_relatorio()
+criar_botao_logout()
 desenvolvido()
 
 
