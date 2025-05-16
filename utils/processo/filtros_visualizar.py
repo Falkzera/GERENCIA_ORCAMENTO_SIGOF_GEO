@@ -126,7 +126,7 @@ def filtros_de_busca(df_filtrado):
     return df_filtrado
 
 def resumo_processo_orcamentario(df_filtrado):
-    st.subheader("Gerarador de Resumos 📄")
+    st.subheader("Gerador de Resumos 📄")
     # st.caption("Os resumos aparecem conforme os filtros aplicados na tabela.")
 
     def formatar_linha(numero):
@@ -197,7 +197,7 @@ def resumo_processo_orcamentario(df_filtrado):
         type='primary'
     )
     else:
-        st.warning("Selecione um número de processo para visualizar o resumo.")
+        st.info("⚠️ Selecione um número de processo para visualizar o resumo.")
 
 
 def resumo_processo_publicado():

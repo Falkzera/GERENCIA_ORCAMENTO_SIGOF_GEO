@@ -100,15 +100,15 @@ if escolha == "Processos de Execução Orçamentária":
                 st.info("⚠️ Para editar um processo, saia do modo Pivot.")
 
     st.write('---')
-    st.subheader("Outras Opções ⚙️")
+    st.subheader("Outras funcionalidades")
     st.caption("Clique para expandir as opções.")
     
     df_filtrado['Valor'] = df_filtrado['Valor'].apply(formatar_valor)
 
-    with st.expander("⚙️ - Resumo dos Processos Cadastrados", expanded=False):
+    with st.expander("📑 **Gerador Automatico de Resumos** 📑", expanded=False):
         resumo_processo_orcamentario(df_filtrado)
 
-    with st.expander("⚙️ - Resumo dos Processos Publicados", expanded=False):
+    with st.expander("📑 **Gerador Automatico de Resumos para Processos Publicados** 📑", expanded=False):
         resumo_processo_publicado()
 
 elif escolha == "Processos  de TED":
