@@ -28,6 +28,7 @@ with st.container():  # PÁGINAS E CONFIGURAÇÃO SIDEBAR
 st.subheader("Relatório CPOF 📊")
 
 load_base_data(forcar_recarregar=True)  
+
 df = pd.DataFrame(st.session_state.base)
 ano, mes, df_filtrado, df_filtrado_mes_anterior = filtro_ano_mes(df, exibir_na_tela=True, key_prefix="home")
 
@@ -48,6 +49,5 @@ botao_gerar_e_baixar_arquivo(
     tipo_arquivo="pdf"
 )
 
-from utils.estilizacao.background import wallpaper
-wallpaper()
+
 
